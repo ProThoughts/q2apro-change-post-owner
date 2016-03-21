@@ -100,7 +100,8 @@
 							$keypostids[$part] = true;							
 						}
 					}
-
+					
+					require_once QA_INCLUDE_DIR.'qa-db-post-update.php';
 					$questionids = qa_db_posts_filter_q_postids(array_keys($keypostids));
 
 					if(count($questionids)==1)
