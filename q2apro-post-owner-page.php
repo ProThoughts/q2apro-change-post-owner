@@ -100,8 +100,7 @@
 							$keypostids[$part] = true;							
 						}
 					}
-					
-					require_once QA_INCLUDE_DIR.'qa-db-post-update.php';
+
 					$questionids = qa_db_posts_filter_q_postids(array_keys($keypostids));
 
 					if(count($questionids)==1)
@@ -153,33 +152,27 @@
 														LIMIT 1', $postid) );
 
 				// questionid or answerid that will hold all succeeding comments to be transferred
-				if($posttype=='Q')
-				{
-					// question
-					$questionid = $postid; // e.g. 52838
-					$succId = $questionid;
-				}
-				else if($posttype=='A')
+				$questionid = $postid; // e.g. 52838
+				if($posttype=='A' || $posttype=='C')
 				{
 					// answer, we need to query again to receive the question id
-					$answerid = $postid;
-					$getQ_query = qa_db_read_all_assoc( 
+					$questionid = qa_db_read_one_value( 
 										qa_db_query_sub('SELECT parentid FROM `^posts` 
 															WHERE `postid` = # 
 															AND `type` = "A"
-															LIMIT 1', $answerid) );
-					$questionid = $getQ_query[0]['parentid']; // e.g. 52838
+															LIMIT 1', $postid) );
 				}
 			
-				// content output success, for now link Q
+				// content output success, link to question
 				$qa_content['custom'] .= '
-										<p>'.
-											qa_lang('q2apro_post_owner_lang/success').
-										'</p>
-										<a target="_blank" href="'.qa_path('').$questionid.'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/open_post').'</a>
-										<a href="'.qa_path('postowner').'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/return').'</a>';
+										<p>
+											'.qa_lang('q2apro_post_owner_lang/success').'
+										</p>
+										<a target="_blank" href="'.qa_path('').'/'.$questionid.'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/open_post').'</a>
+										<a href="'.qa_path('postowner').'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/return').'</a>
+										';
 				return $qa_content;
-			}
+			} // end request
 
 
 			/* default page with convert dialog */
