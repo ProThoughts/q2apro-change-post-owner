@@ -38,6 +38,25 @@
 	qa_register_plugin_phrases('q2apro-post-owner-lang-*.php', 'q2apro_post_owner_lang');
 
 
+	
+	function q2apro_get_parentid_from_postid($postid)
+	{
+		return qa_db_read_one_value( 
+				qa_db_query_sub('SELECT parentid FROM `^posts` 
+									WHERE `postid` = # 
+									', $postid) 
+									);
+	}
+
+	function q2apro_get_type_from_postid($postid)
+	{
+		return qa_db_read_one_value( 
+				qa_db_query_sub('SELECT type FROM `^posts` 
+									WHERE `postid` = # 
+									', $postid) 
+									);
+	}
+
 /*
 	Omit PHP closing tag to help avoid accidental output
 */
