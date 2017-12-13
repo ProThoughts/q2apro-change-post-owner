@@ -16,7 +16,7 @@
 		'success' => 'Success: New user assigned to the post.',
 		'answer_id' => 'Answer ID',
 		'question_id' => 'Question ID',
-		'open_post' => 'Open post',
+		'open_question' => 'Open question',
 		'return' => 'return to converter',
 		'error1' => 'Error: The username you entered does not exist.',
 		'error2' => 'Error: Username not mentioned and post not supposed to be anonymous.',
