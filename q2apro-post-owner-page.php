@@ -44,8 +44,8 @@
 		{
 		
 			// return if not admin level
-			$level=qa_get_logged_in_level();
-			if($level<QA_USER_LEVEL_ADMIN)
+			$level = qa_get_logged_in_level();
+			if($level < QA_USER_LEVEL_ADMIN)
 			{
 				$qa_content = qa_content_prepare();
 				$qa_content['error'] = qa_lang('q2apro_post_owner_lang/not_allowed');
@@ -63,7 +63,7 @@
 
 			// some CSS styling
 			$qa_content['custom'] .= '
-			<style type="text/css">
+			<style>
 				#convdiv, .qa-main p, .qa-main a, .qa-main input { 
 					font-size:14px; padding:2px 5px;
 				}
@@ -91,7 +91,7 @@
 				if(filter_var($postid, FILTER_VALIDATE_URL))
 				{
 					$parts = preg_split('|[=/&]|', $postid, -1, PREG_SPLIT_NO_EMPTY);
-					$keypostids=array();
+					$keypostids = array();
 
 					foreach ($parts as $part)
 					{
@@ -152,27 +152,44 @@
 														LIMIT 1', $postid) );
 
 				// questionid or answerid that will hold all succeeding comments to be transferred
-				$questionid = $postid; // e.g. 52838
-				if($posttype=='A' || $posttype=='C')
+				$questionid = null;
+				if($posttype=='Q')
 				{
-					// answer, we need to query again to receive the question id
-					$questionid = qa_db_read_one_value( 
-										qa_db_query_sub('SELECT parentid FROM `^posts` 
-															WHERE `postid` = # 
-															AND `type` = "A"
-															LIMIT 1', $postid) );
+					// question
+					$questionid = $postid;
+				}
+				else if($posttype=='A')
+				{
+					// answer, the parent is always a question 
+					$questionid = q2apro_get_parentid_from_postid($postid);
+				}
+				else if($posttype=='C')
+				{
+					// comment, we need to query the parent Q or A 
+					$parentid = q2apro_get_parentid_from_postid($postid);
+					$parenttype = q2apro_get_type_from_postid($parentid);
+					
+					if($parenttype=='Q')
+					{
+						// question
+						$questionid = $parentid;
+					}
+					else if($parenttype=='A')
+					{
+						// answer, the parent is always a question 
+						$questionid = q2apro_get_parentid_from_postid($parentid);
+					}
 				}
 			
-				// content output success, link to question
+				// content output success, for now link Q
 				$qa_content['custom'] .= '
-										<p>
-											'.qa_lang('q2apro_post_owner_lang/success').'
-										</p>
-										<a target="_blank" href="'.qa_path('').'/'.$questionid.'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/open_post').'</a>
-										<a href="'.qa_path('postowner').'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/return').'</a>
-										';
+										<p>'.
+											qa_lang('q2apro_post_owner_lang/success').
+										'</p>
+										<a target="_blank" href="'.qa_path('').$questionid.'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/open_question').'</a>
+										<a href="'.qa_path('postowner').'" class="qa-form-basic-button">'.qa_lang('q2apro_post_owner_lang/return').'</a>';
 				return $qa_content;
-			} // end request
+			}
 
 
 			/* default page with convert dialog */
@@ -189,7 +206,7 @@
 											</form>
 										 </div>';
 			return $qa_content;
-		}
+		} // END process_request
 		
 	};
 	
